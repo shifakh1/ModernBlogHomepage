@@ -1,4 +1,4 @@
- // DOM Content Loaded
+  // DOM Content Loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize all functionality
             initLoader();
@@ -15,6 +15,9 @@
             initTestimonials();
             initAuthorFollow();
             initAdvancedInteractions();
+            initReadingProgress();
+            initSearchFunctionality();
+            initLoadMore();
         });
 
         // Loading screen
@@ -22,6 +25,7 @@
             const loader = document.querySelector('.loader');
             setTimeout(() => {
                 loader.classList.add('hidden');
+                document.body.classList.remove('no-scroll');
             }, 1500);
         }
 
@@ -161,6 +165,7 @@
             themeToggle.addEventListener('click', function() {
                 document.body.classList.toggle('dark-mode');
                 localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+                showToast('Theme changed successfully!', 'success');
             });
         }
 
@@ -344,7 +349,7 @@
 
         // Newsletter form validation
         function initNewsletterValidation() {
-            const newsletterForms = document.querySelectorAll('.newsletter-form, .cta-form');
+            const newsletterForms = document.querySelectorAll('#newsletter-form, #sidebar-newsletter-form');
             
             newsletterForms.forEach(form => {
                 form.addEventListener('submit', function(e) {
@@ -355,18 +360,18 @@
                     
                     if (validateEmail(email)) {
                         // Simulate successful submission
-                        const originalContent = this.innerHTML;
-                        this.innerHTML = '<p class="success-message">Thank you for subscribing!</p>';
-                        setTimeout(() => {
-                            this.reset();
-                            this.innerHTML = originalContent;
-                        }, 3000);
+                        showToast('Thank you for subscribing to our newsletter!', 'success');
+                        this.reset();
                     } else {
                         // Show error
                         emailInput.classList.add('error');
+                        this.querySelector('.error-message').style.display = 'block';
+                        showToast('Please enter a valid email address', 'error');
+                        
                         setTimeout(() => {
                             emailInput.classList.remove('error');
-                        }, 2000);
+                            this.querySelector('.error-message').style.display = 'none';
+                        }, 3000);
                     }
                 });
             });
@@ -393,12 +398,14 @@
                         icon.classList.remove('fas');
                         icon.classList.add('far');
                         count.textContent = parseInt(count.textContent) - 1;
+                        showToast('Removed from your favorites', 'info');
                     } else {
                         // Like
                         this.classList.add('liked');
                         icon.classList.remove('far');
                         icon.classList.add('fas');
                         count.textContent = parseInt(count.textContent) + 1;
+                        showToast('Added to your favorites', 'success');
                     }
                 });
             });
@@ -448,35 +455,152 @@
                         this.textContent = 'Following';
                         this.classList.add('btn-primary');
                         this.classList.remove('btn-outline');
+                        showToast('You are now following this author', 'success');
                     } else {
                         this.textContent = 'Follow';
                         this.classList.remove('btn-primary');
                         this.classList.add('btn-outline');
+                        showToast('You unfollowed this author', 'info');
                     }
                 });
             });
         }
 
         // Load more posts functionality
-        document.querySelector('.load-more button').addEventListener('click', function() {
-            // Simulate loading more posts
-            const originalText = this.textContent;
-            this.textContent = 'Loading...';
-            this.disabled = true;
+        function initLoadMore() {
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const postsGrid = document.querySelector('.posts-grid');
+            let currentPage = 1;
             
-            setTimeout(() => {
-                // In a real application, you would fetch more posts from a server
-                // For this example, we'll just show an alert
-                alert('More posts would be loaded in a real application.');
+            loadMoreBtn.addEventListener('click', function() {
+                // Simulate loading more posts
+                const originalText = this.textContent;
+                this.textContent = 'Loading...';
+                this.disabled = true;
                 
-                this.textContent = originalText;
-                this.disabled = false;
-            }, 1000);
-        });
+                setTimeout(() => {
+                    // In a real application, you would fetch more posts from a server
+                    // For this example, we'll just clone existing posts
+                    const existingPosts = document.querySelectorAll('.post-card');
+                    const postsToAdd = [];
+                    
+                    // Clone first 2 posts to simulate new content
+                    for (let i = 0; i < 2 && i < existingPosts.length; i++) {
+                        const clone = existingPosts[i].cloneNode(true);
+                        clone.style.opacity = '0';
+                        clone.style.transform = 'translateY(30px)';
+                        postsToAdd.push(clone);
+                    }
+                    
+                    // Add the new posts to the grid
+                    postsToAdd.forEach(post => {
+                        postsGrid.appendChild(post);
+                        
+                        // Animate the new posts in
+                        setTimeout(() => {
+                            post.style.opacity = '1';
+                            post.style.transform = 'translateY(0)';
+                        }, 100);
+                    });
+                    
+                    this.textContent = originalText;
+                    this.disabled = false;
+                    
+                    // Show a message if we've reached the "end"
+                    currentPage++;
+                    if (currentPage >= 3) {
+                        this.style.display = 'none';
+                        showToast('All articles have been loaded', 'info');
+                    } else {
+                        showToast('More articles loaded successfully', 'success');
+                    }
+                }, 1000);
+            });
+        }
 
         // Particles.js background
         function initParticles() {
             // This would initialize particles.js in a real implementation
             // For now, we'll just add a simple CSS-based animation
             console.log("Particles background would be initialized here");
+        }
+
+        // Reading progress bar
+        function initReadingProgress() {
+            const progressBar = document.querySelector('.reading-progress');
+            
+            window.addEventListener('scroll', function() {
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
+                
+                progressBar.style.width = scrollPercent + '%';
+            });
+        }
+
+        // Search functionality
+        function initSearchFunctionality() {
+            const searchInput = document.getElementById('search-input');
+            const searchButton = document.getElementById('search-button');
+            
+            searchButton.addEventListener('click', function() {
+                performSearch();
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                
+                if (searchTerm.length < 2) {
+                    showToast('Please enter at least 2 characters to search', 'error');
+                    return;
+                }
+                
+                // In a real application, you would make an API call here
+                // For this example, we'll just show a message
+                showToast(`Searching for: ${searchTerm}`, 'info');
+                
+                // Clear the input
+                searchInput.value = '';
+            }
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Add icon based on type
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            
+            toast.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Show the toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // Hide the toast after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                
+                // Remove the toast from DOM after animation completes
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 5000);
         }

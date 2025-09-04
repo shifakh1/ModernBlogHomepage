@@ -9,7 +9,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-         <!-- Loading Screen -->
+         <!-- Reading Progress Bar -->
+    <div class="reading-progress"></div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <!-- Loading Screen -->
     <div class="loader">
         <div class="loader-circle"></div>
     </div>
@@ -30,8 +36,8 @@
                         <li><a href="#contact" class="nav-link">Contact</a></li>
                     </ul>
                     <div class="search-box">
-                        <input type="text" placeholder="Search...">
-                        <button><i class="fas fa-search"></i></button>
+                        <input type="text" placeholder="Search..." id="search-input">
+                        <button id="search-button"><i class="fas fa-search"></i></button>
                     </div>
                 </nav>
                 <button class="hamburger">
@@ -457,7 +463,7 @@
                         </article>
                     </div>
                     <div class="load-more">
-                        <button class="btn btn-outline glow-effect">Load More Articles</button>
+                        <button class="btn btn-outline glow-effect" id="load-more-btn">Load More Articles</button>
                     </div>
                 </section>
 
@@ -525,8 +531,9 @@
                     <div class="widget newsletter-widget enhanced-hover">
                         <h3 class="widget-title">Subscribe to Newsletter</h3>
                         <p>Stay updated with our latest articles and news. Enter your email below.</p>
-                        <form class="newsletter-form">
+                        <form class="newsletter-form" id="sidebar-newsletter-form">
                             <input type="email" placeholder="Your Email Address" required>
+                            <div class="error-message">Please enter a valid email address</div>
                             <button type="submit" class="btn btn-primary glow-effect">Subscribe</button>
                         </form>
                     </div>
@@ -558,7 +565,7 @@
             <div class="cta-content">
                 <h2>Stay Updated With Our Latest News</h2>
                 <p>Subscribe to our newsletter and never miss our latest articles, travel guides, and exclusive content.</p>
-                <form class="cta-form">
+                <form class="cta-form" id="newsletter-form">
                     <input type="email" placeholder="Enter your email address" required>
                     <button type="submit" class="btn btn-primary glow-effect">Subscribe Now</button>
                 </form>
